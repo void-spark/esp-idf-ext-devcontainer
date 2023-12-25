@@ -16,6 +16,8 @@ RUN apt-get update \
   linux-tools-virtual \
   && rm -rf /var/lib/apt/lists/*
 
+RUN bash -c '. /opt/esp/idf/export.sh && pip install esp-debug-backend' 
+
 RUN update-alternatives --install /usr/local/bin/usbip usbip `ls /usr/lib/linux-tools/*/usbip | tail -n1` 20
 
 # QEMU
@@ -35,8 +37,10 @@ RUN wget --no-verbose ${QEMU_URL} \
 ENV PATH=/opt/qemu/bin:${PATH}
 
 RUN groupadd --gid $USER_GID $CONTAINER_USER \
+    && groupadd --gid 986 uucp2 \
     && adduser --uid $USER_UID --gid $USER_GID --disabled-password --gecos "" ${CONTAINER_USER} \
-    && usermod -a -G dialout $CONTAINER_USER
+    && usermod -a -G dialout $CONTAINER_USER \
+    && usermod -a -G uucp2 $CONTAINER_USER
 USER ${CONTAINER_USER}
 ENV USER=${CONTAINER_USER}
 WORKDIR /home/${CONTAINER_USER}
